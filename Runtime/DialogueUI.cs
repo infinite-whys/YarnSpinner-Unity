@@ -121,7 +121,7 @@ namespace Yarn.Unity {
         /// This method is called before <see cref="onLineUpdate"/> is
         /// called. Use this event to prepare the scene to deliver a line.
         /// </remarks>
-        public UnityEngine.Events.UnityEvent onLineStart;
+        public DialogueRunner.StringUnityEvent onLineStart;
 
         /// <summary>
         /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
@@ -273,12 +273,26 @@ namespace Yarn.Unity {
 
         /// Show a line of dialogue, gradually        
         private IEnumerator DoRunLine(Yarn.Line line, ILineLocalisationProvider localisationProvider, System.Action onComplete) {
-            onLineStart?.Invoke();
+            
 
             userRequestedNextLine = false;
             
             // The final text we'll be showing for this line.
             string text = localisationProvider.GetLocalisedTextForLine(line);
+
+            // -------
+            
+            if(text.Contains(":")){
+                int i=text.IndexOf(':');
+                string character=text.Substring(0,i);
+                onLineStart?.Invoke(character);
+                text=text.Substring(i+1);
+            }else{
+                onLineStart?.Invoke("voiceover");
+            }
+
+        
+            // -------
 
             if (text == null) {
                 Debug.LogWarning($"Line {line.ID} doesn't have any localised text.");
